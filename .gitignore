@@ -19,3 +19,7 @@ ENV/
 # OS
 .DS_Store
 Thumbs.db
+
+# Model file (large, not in repo; copy or scp to this folder)
+svm.joblib
+*.joblib

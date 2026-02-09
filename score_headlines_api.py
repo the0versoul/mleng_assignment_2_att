@@ -32,16 +32,9 @@ logger = logging.getLogger(__name__)
 # paths and config
 # ---------------------------------------------------------------------------
 
-# Look for the trained model: env var, then mleng_assignment_1_additional, then assignment_1
+# Model lives in the same folder as this script (relative path so it works on server)
 _SCRIPT_DIR = Path(__file__).resolve().parent
-_PARENT = _SCRIPT_DIR.parent
-_CANDIDATES = [
-    _PARENT / "mleng_assignment_1_additional" / "svm.joblib",
-    _PARENT / "assignment_1" / "svm.joblib",
-]
-MODEL_PATH = os.environ.get("HEADLINE_MODEL_PATH") or next(
-    (str(p) for p in _CANDIDATES if p.exists()), str(_CANDIDATES[0])
-)
+MODEL_PATH = os.environ.get("HEADLINE_MODEL_PATH", str(_SCRIPT_DIR / "svm.joblib"))
 LOCAL_TRANSFORMER_PATH = "/opt/huggingface_models/all-MiniLM-L6-v2"
 
 # ---------------------------------------------------------------------------
@@ -155,7 +148,7 @@ def score_headlines(request: HeadlinesRequest):
 
 
 # ---------------------------------------------------------------------------
-# run with: uvicorn score_headlines_api:app --host 0.0.0.0 --port 8088
+# run with: uvicorn score_headlines_api:app --host 0.0.0.0 --port 8088  (port 8088 = alextsourmas)
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":

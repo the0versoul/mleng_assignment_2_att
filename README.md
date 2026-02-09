@@ -1,41 +1,48 @@
-# Assignment 2: Headline Sentiment API
+# Headline Sentiment API (Assignment 2)
 
-Web service that scores headlines in real time. Uses the model and assets from assignment 1 (sibling folder `mleng_assignment_1_att`).
+Small web service that scores headlines with the same sentiment model from assignment 1. Two endpoints: a health check and a POST that takes a list of headlines and returns labels only.
 
-## Run the service
+## Running it
 
-From this directory (or with `PYTHONPATH` set so it can find the module):
+The API looks for the model file `svm.joblib` in the same folder as `score_headlines_api.py` (relative path, so it works the same locally and on the server). The file is in `.gitignore` so it’s not in the repo—if you’re deploying somewhere, copy `svm.joblib` into this folder first (e.g. with scp). You can override with `HEADLINE_MODEL_PATH` if you need to point somewhere else.
 
 ```bash
 pip install -r requirements.txt
 uvicorn score_headlines_api:app --host 0.0.0.0 --port 8088
 ```
 
-Or: `python score_headlines_api.py` (runs uvicorn on 8088).
-
-Port 8088 is the one assigned for this student. Make sure nothing else is bound to it (`lsof -i:8088`).
+Use port **8088** (assigned for alextsourmas). Same port on the server. First startup can take a bit while the transformer model loads.
 
 ## Endpoints
 
-- **GET /status**  
-  Returns `{"status": "OK"}`. Use this to check that the service is up.
+**GET /status**
 
-- **POST /score_headlines**  
-  Body: `{"headlines": ["headline one", "headline two", ...]}`  
-  Returns: `{"labels": ["Optimistic", "Neutral", ...]}` (labels only; client matches them to headlines by index).
-
-## Test with curl
+Returns `{"status": "OK"}` so you can check the service is up.
 
 ```bash
-# health check
 curl http://localhost:8088/status
-
-# score a few headlines
-curl -X POST http://localhost:8088/score_headlines \
-  -H "Content-Type: application/json" \
-  -d '{"headlines": ["Markets rise on strong jobs report", "Local council delays vote"]}'
 ```
 
-## Model path
+**POST /score_headlines**
 
-The API looks for `svm.joblib` in `../mleng_assignment_1_att/` by default. Override with env var `HEADLINE_MODEL_PATH` if your layout is different (e.g. on the server).
+Send a JSON body with a list of headlines. You get back a list of labels in the same order (Optimistic, Neutral, or Pessimistic). No headline text in the response so the client has to match by index if needed.
+
+Request body:
+```json
+{"headlines": ["First headline here", "Second one", "etc"]}
+```
+
+Response:
+```json
+{"labels": ["Optimistic", "Neutral", "Pessimistic"]}
+```
+
+Example with curl:
+
+```bash
+curl -X POST http://localhost:8088/score_headlines \
+  -H "Content-Type: application/json" \
+  -d '{"headlines": ["Markets rise on jobs data", "City council delays vote"]}'
+```
+
+That’s it. The model and transformer are loaded once at startup, not per request.
